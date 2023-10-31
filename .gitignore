@@ -18,3 +18,6 @@ web-build/
 
 # IDE
 .idea
+
+#custom
+./%ProgramData%
