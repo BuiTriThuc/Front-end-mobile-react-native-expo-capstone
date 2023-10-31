@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import { TouchableOpacity } from "react-native";
 import { StyleSheet } from "react-native";
 import { Text } from "react-native";
@@ -9,16 +9,32 @@ import { useNavigation } from "@react-navigation/native";
 import { TextInput } from "react-native";
 import { ScrollView } from "react-native";
 import { Image } from "react-native";
+import {useDispatch, useSelector} from "react-redux";
+import {setApartmentForRentParams} from "../../redux/slices/searchApartmentForRentSlice";
 
 export default function SearchAdressBottomSheet() {
+  const searchParams = useSelector(
+      (state) => state.apartment?.searchParams??{}
+  );
+  const dispatch = useDispatch();
   const navigation = useNavigation();
   const [visible, setVisible] = useState(false);
-  const [searchText, setSearchText] = useState("");
-  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [searchText, setSearchText] = useState(searchParams.locationName??"");
+  const [selectedLocation, setSelectedLocation] = useState(searchParams.locationName??"");
+
 
   const toggleBottomNavigationView = () => {
     setVisible(!visible);
   };
+
+  useEffect(() => {
+    updateSearchParams();
+  }, [searchText]);
+
+  const updateSearchParams = () => {
+    dispatch(setApartmentForRentParams({...searchParams, locationName: searchText }));
+  }
+
   return (
     <View className="">
       <View style={styles.shadow} className="bg-white rounded-xl  ">
@@ -33,7 +49,9 @@ export default function SearchAdressBottomSheet() {
           <TextInput
             className="w-[100%] font-bold"
             value={searchText}
-            onChangeText={(text) => setSearchText(text)}
+            onChangeText={(text) => {
+              setSearchText(text);
+            }}
           />
         </TouchableOpacity>
         <View className="pb-2">

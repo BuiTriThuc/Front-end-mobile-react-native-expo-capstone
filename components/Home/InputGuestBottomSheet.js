@@ -5,20 +5,30 @@ import { Text, View } from "react-native";
 import { BottomSheet } from "react-native-btr";
 import { AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import {useDispatch, useSelector} from "react-redux";
+import {setApartmentForRentParams} from "../../redux/slices/searchApartmentForRentSlice";
 
 export default function InputGuestBottomSheet() {
   const navigation = useNavigation();
+  const searchParams = useSelector(
+      (state) => state.apartment?.searchParams??{}
+  );
+  const dispatch = useDispatch();
   const [visible, setVisible] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [selectedLocation, setSelectedLocation] = useState(null);
 
   const [showGuestCount, setShowGuestCount] = useState(false);
 
+
+
+
   const toggleBottomNavigationView = () => {
     setVisible(!visible);
   };
 
   const applyChanges = () => {
+    dispatch(setApartmentForRentParams({...searchParams, guest: adultCount + childCount + babyCount }));
     toggleBottomNavigationView();
     setShowGuestCount(true);
   };
@@ -84,11 +94,23 @@ export default function InputGuestBottomSheet() {
         <TouchableOpacity onPress={toggleBottomNavigationView}>
           <View className="flex flex-row justify-between">
             <Text>Guest:</Text>
+            {/*<Text style={{ fontWeight: "bold", fontSize: 15 }}>*/}
+            {/*  {isAdultCountChanged ? `Adult: ${adultCount} ` : ""}*/}
+            {/*  {isChildCountChanged ? `Children: ${childCount} ` : ""}*/}
+            {/*  {isBabyCountChanged ? `Baby: ${babyCount} ` : ""}*/}
+            {/*  {isPetCountChanged ? `Pet: ${petCount}` : ""}*/}
+            {/*  {!isAdultCountChanged &&*/}
+            {/*  !isChildCountChanged &&*/}
+            {/*  !isBabyCountChanged &&*/}
+            {/*  !isPetCountChanged*/}
+            {/*    ? "Add guest"*/}
+            {/*    : ""}*/}
+            {/*</Text>*/}
             <Text style={{ fontWeight: "bold", fontSize: 15 }}>
-              {isAdultCountChanged ? `Adult: ${adultCount} ` : ""}
-              {isChildCountChanged ? `Children: ${childCount} ` : ""}
-              {isBabyCountChanged ? `Baby: ${babyCount} ` : ""}
-              {isPetCountChanged ? `Pet: ${petCount}` : ""}
+              {isAdultCountChanged ||
+              isChildCountChanged ||
+              isBabyCountChanged ||
+              isPetCountChanged ? `Guest: ${(adultCount??0) + (childCount??0) + (babyCount??0)}` : ""}
               {!isAdultCountChanged &&
               !isChildCountChanged &&
               !isBabyCountChanged &&

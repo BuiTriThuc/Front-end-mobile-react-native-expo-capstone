@@ -10,11 +10,36 @@ import SearchDateBottomSheet from "../../components/Home/SearchDateBottomSheet";
 import InputGuestBottomSheet from "../../components/Home/InputGuestBottomSheet";
 import SearchResortBottomSheet from "../../components/Home/SearchResortBottomSheet";
 import { ScrollView } from "react-native";
+import {fetchApartmentForRent, fetchApartments} from "../../redux/slices/searchApartmentForRentSlice";
+import {useDispatch, useSelector} from "react-redux";
+import ApartmentForRentsApis from "../../apis/apartment/ApartmentForRentsApis";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
 
 export default function SearchApartment() {
   const navigation = useNavigation();
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [searchText, setSearchText] = useState("");
+  const dispatch = useDispatch();
+  const { loading, searchParams, data } = useSelector(
+      (state) => state.apartment??{}
+  );
+  const SearchApartmentForRentSubmit = () => {
+    var params = {
+      ...searchParams,
+        locationName: searchText,
+
+    }
+    ApartmentForRentsApis.getAllBySearchParams(searchParams)
+        .then((res) => {
+          dispatch(fetchApartments(res));
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    console.log(data.content);
+    console.log(searchParams);
+  };
 
   return (
     <View className="bg-white flex-1">
@@ -40,7 +65,9 @@ export default function SearchApartment() {
           onPress={() => navigation.navigate("Homes")}
           className="py-3 px-8 rounded-md bg-sky-500"
         >
-          <Text className="text-white text-center font-bold text-lg">
+          <Text className="text-white text-center font-bold text-lg"
+            onPress={SearchApartmentForRentSubmit}
+          >
             Search
           </Text>
         </TouchableOpacity>

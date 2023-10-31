@@ -8,7 +8,7 @@ import {
   LOAD_USER_FAIL,
 } from "../constants/userConstants";
 
-export const userReducers = (state = { user: {}, userProfile: {} }, action) => {
+export const userReducers =   (state = { user: {}, userProfile: {} }, action) => {
   switch (action.type) {
     case LOGIN_REQUEST:
     case LOAD_USER_REQUEST:

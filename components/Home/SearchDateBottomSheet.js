@@ -11,6 +11,8 @@ import { ScrollView } from "react-native";
 import { Image } from "react-native";
 import InputDateComponents from "../dateInput/InputDateComponents";
 import { format } from "date-fns";
+import {useDispatch, useSelector} from "react-redux";
+import {setApartmentForRentParams} from "../../redux/slices/searchApartmentForRentSlice";
 
 const initialDateRange = {
   startDate: new Date(),
@@ -19,6 +21,10 @@ const initialDateRange = {
 
 export default function SearchDateBottomSheet() {
   const navigation = useNavigation();
+  const searchParams = useSelector(
+      (state) => state.apartment?.searchParams??{}
+  );
+  const dispatch = useDispatch();
   const [visible, setVisible] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -26,6 +32,7 @@ export default function SearchDateBottomSheet() {
 
   const handleDateRange = (value) => {
     setDateRange(value);
+    dispatch(setApartmentForRentParams({...searchParams, checkIn: value.startDate, checkOut: value.endDate }));
   };
 
   const toggleBottomNavigationView = () => {
