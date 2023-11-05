@@ -23,9 +23,9 @@ export default function SearchAdressBottomSheet(props) {
   const toggleBottomNavigationView = () => {
     setVisible(!visible);
   };
-  const onSubmitHandler = (text) => {
-    var searchParam = { locationName: text };
-    dispatch(submitSearchParamApartmentForRent(searchParam));
+  const onTextChangeHandle = (text) => {
+    setSearchText(text);
+    props.setLocationName(text);
   };
   return (
     <View className="">
@@ -41,8 +41,7 @@ export default function SearchAdressBottomSheet(props) {
             className="w-[100%] font-bold"
             value={searchText}
             onChangeText={(text) => {
-              setSearchText(text);
-              onSubmitHandler(text);
+              onTextChangeHandle(text);
             }}
           />
         </TouchableOpacity>

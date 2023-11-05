@@ -25,12 +25,26 @@ export default function SearchApartment(props) {
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [numberGuest, setNumberGuest] = useState("");
+  const [pageNo, setPageNo] = useState(0);
   const submitSearch = () => {
-    navigation.navigate("Homes");
-    var searchParam = { locationName: locationName };
+    var searchParam = {
+      locationName: locationName,
+      checkIn: checkIn,
+      checkOut: checkOut,
+      guest: numberGuest,
+      pageNo: pageNo,
+    };
+    console.log("searchParam :>> ", searchParam);
     dispatch(submitSearchParamApartmentForRent(searchParam));
+    navigation.navigate("Homes");
   };
-
+  const onClearForm = () => {
+    setLocationName("");
+    setCheckIn("");
+    setCheckOut("");
+    setNumberGuest("");
+    setPageNo(0);
+  };
   return (
     <View className="bg-white flex-1">
       <View className="bg-blue-500 w-full h-[100px]  flex flex-row items-center justify-start px-5">
@@ -49,7 +63,7 @@ export default function SearchApartment(props) {
         </View>
       </ScrollView>
       <View className="flex flex-row items-center justify-between px-4 py-3 bg-white border-t border-gray-400 fixed w-full">
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => onClearForm()}>
           <Text className="font-bold underline text-black">Clear all</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => submitSearch()} className="py-3 px-8 rounded-md bg-sky-500">
