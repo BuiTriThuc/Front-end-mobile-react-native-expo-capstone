@@ -1,5 +1,5 @@
 import { AntDesign } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import React, { useState } from "react";
 import { StyleSheet } from "react-native";
 import { Text } from "react-native";
@@ -10,11 +10,26 @@ import SearchDateBottomSheet from "../../components/Home/SearchDateBottomSheet";
 import InputGuestBottomSheet from "../../components/Home/InputGuestBottomSheet";
 import SearchResortBottomSheet from "../../components/Home/SearchResortBottomSheet";
 import { ScrollView } from "react-native";
+import { Button } from "react-native-paper";
+import { useDispatch, useSelector } from "react-redux";
+import { submitSearchParamApartmentForRent } from "../../redux/actions/searchParamActions";
 
-export default function SearchApartment() {
+export default function SearchApartment(props) {
   const navigation = useNavigation();
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [searchText, setSearchText] = useState("");
+  const dispatch = useDispatch();
+  const { searchParam } = useSelector((state) => state.searchParam);
+  const handlerChamge = () => {};
+  const [locationName, setLocationName] = useState("");
+  const [checkIn, setCheckIn] = useState("");
+  const [checkOut, setCheckOut] = useState("");
+  const [numberGuest, setNumberGuest] = useState("");
+  const submitSearch = () => {
+    navigation.navigate("Homes");
+    var searchParam = { locationName: locationName };
+    dispatch(submitSearchParamApartmentForRent(searchParam));
+  };
 
   return (
     <View className="bg-white flex-1">
@@ -24,25 +39,21 @@ export default function SearchApartment() {
         </TouchableOpacity>
         <Text className="ml-8 text-[20px] text-white">Search Home</Text>
       </View>
+      {/* <Button title="Press me" onPress={() => handleSetTestData("asdsad")} /> */}
       <ScrollView showsVerticalScrollIndicator={false}>
         <View className="px-4 mt-5 py-5">
-          <SearchAdressBottomSheet />
+          <SearchAdressBottomSheet setLocationName={setLocationName} />
           <SearchResortBottomSheet />
-          <SearchDateBottomSheet />
-          <InputGuestBottomSheet />
+          <SearchDateBottomSheet setCheckIn={setCheckIn} setCheckOut={setCheckOut} />
+          <InputGuestBottomSheet setNumberGuest={setNumberGuest} />
         </View>
       </ScrollView>
       <View className="flex flex-row items-center justify-between px-4 py-3 bg-white border-t border-gray-400 fixed w-full">
         <TouchableOpacity>
           <Text className="font-bold underline text-black">Clear all</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => navigation.navigate("Homes")}
-          className="py-3 px-8 rounded-md bg-sky-500"
-        >
-          <Text className="text-white text-center font-bold text-lg">
-            Search
-          </Text>
+        <TouchableOpacity onPress={() => submitSearch()} className="py-3 px-8 rounded-md bg-sky-500">
+          <Text className="text-white text-center font-bold text-lg">Search</Text>
         </TouchableOpacity>
       </View>
     </View>

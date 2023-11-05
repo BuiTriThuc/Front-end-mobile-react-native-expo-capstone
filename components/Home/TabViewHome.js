@@ -6,6 +6,8 @@ import CarouselApartmentHome from "../apartment/CaroselApartmentHome";
 import MapHome from "../mapHome/MapHome";
 import axios from "axios";
 import CarouselApartmentImage from "../apartment/CarouselApartmentImage";
+import { useSelector } from "react-redux";
+import { Button } from "react-native-paper";
 
 const ApartmentDatasImpress = [
   {
@@ -112,11 +114,14 @@ const ApartmentDatasCity = [
   },
 ];
 
-export default function TabViewHome() {
+export default function TabViewHome(props) {
   useEffect(() => {
     fetchListApartmentForRent();
   }, []);
+  // const searchParam = props.searchParam;
+  const { searchParam } = useSelector((state) => state.searchParam);
 
+  const navigation = useNavigation();
   const tabs = ["Caroline Resort", "Saigon Park Resort", "Lakeview Villa", "Resort InterContinental Danang "];
   const [selectedTab, setSelectedTab] = useState("Caroline Resort");
 
@@ -124,15 +129,27 @@ export default function TabViewHome() {
   const [apartment, setApartment] = useState({});
   const [listApartment, setListApartment] = useState([]);
   const [resort, setResort] = useState({});
-  const navigation = useNavigation();
-  const apiUrl = "https://api.example.com/apartments";
+  let param = `?locationName=${searchParam.locationName}&resortId=${searchParam.resortId}&checkIn=${searchParam.checkIn}&checkOut=${searchParam.checkOut}&min=${searchParam.min}&max=${searchParam.max}&guest=${searchParam.guest}&numberBedsRoom=${searchParam.numberBedsRoom}&numberBathRoom=${searchParam.numberBathRoom}&pageNo=${searchParam.pageNo}&pageSize=${searchParam.pageSize}&sortBy=${searchParam.sortBy}&sortDirection=${searchParam.sortDirection}`;
+  const apiUrl = "https://holiday-swap.click/api/v1/apartment-for-rent";
+
+  const loadArrayOfParram = (listOfParram, name) => {
+    listOfParram.map((data) => {
+      param += `&${name}=${data}`;
+    });
+  };
   let config = {
     method: "get",
     maxBodyLength: Infinity,
-    url: "https://holiday-swap.click/api/v1/apartment-for-rent?guest=1&numberBedsRoom=1&numberBathRoom=1&pageNo=0&pageSize=10&sortBy=id&sortDirection=asc",
+    url: "",
     headers: {},
   };
   const fetchListApartmentForRent = () => {
+    loadArrayOfParram(searchParam.listOfInRoomAmenity, "listOfInRoomAmenity", param);
+    loadArrayOfParram(searchParam.listOfPropertyView, "listOfPropertyView", param);
+    loadArrayOfParram(searchParam.listOfPropertyType, "listOfPropertyType", param);
+    config.url = apiUrl.concat(param);
+    console.log("config.url", config.url);
+    
     axios
       .request(config)
       .then((response) => {
@@ -154,6 +171,7 @@ export default function TabViewHome() {
       case "Caroline Resort":
         return (
           <View style={styles.shadow} className="flex-1  ">
+            <Text>{searchParam.locationName} value</Text>
             <ScrollView showsVerticalScrollIndicator={false} className="mt-5">
               <View>
                 {listApartmentForRent.map((item, index) => {
@@ -395,6 +413,7 @@ export default function TabViewHome() {
 
   return (
     <View className="flex-1 px-4 bg-white">
+      {/* <Text>{paramSearch?.sortDirection}</Text> */}
       <View className=" border-b border-blue-200 ">
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View className="flex flex-row gap-10 ">
