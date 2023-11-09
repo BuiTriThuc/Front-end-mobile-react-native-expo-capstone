@@ -7,7 +7,7 @@ import MapHome from "../mapHome/MapHome";
 import axios from "axios";
 import CarouselApartmentImage from "../apartment/CarouselApartmentImage";
 import { useDispatch, useSelector } from "react-redux";
-import { Button } from "react-native-paper";
+import { ActivityIndicator, Button } from "react-native-paper";
 import { submitSearchParamApartmentForRent } from "../../redux/actions/searchParamActions";
 
 const ApartmentDatasImpress = [
@@ -118,15 +118,18 @@ const ApartmentDatasCity = [
 export default function TabViewHome(props) {
   const { searchParam } = useSelector((state) => state.searchParam);
   useEffect(() => {
+    if (searchParam.pageNo == 0) setLoading({ ...loading, loading: true });
+
     fetchListApartmentForRent();
   }, [searchParam]);
 
   const navigation = useNavigation();
-  const tabs = ["Caroline Resort", "Saigon Park Resort", "Lakeview Villa", "Resort InterContinental Danang "];
+  const tabs = ["Caroline Resort", "Saigon Park Resort"];
   const [selectedTab, setSelectedTab] = useState("Caroline Resort");
   let pageNo = searchParam.pageNo;
   const [listApartmentForRent, setListApartmentForRent] = useState([]);
   const [data, setData] = useState({});
+  const [loading, setLoading] = useState({ loading: true, loadingNextPage: false });
   const dispatch = useDispatch();
   let param = "";
   const apiUrl = "https://holiday-swap.click/api/v1/apartment-for-rent";
@@ -148,10 +151,12 @@ export default function TabViewHome(props) {
     loadArrayOfParram(searchParam.listOfPropertyView, "listOfPropertyView", param);
     loadArrayOfParram(searchParam.listOfPropertyType, "listOfPropertyType", param);
     config.url = apiUrl.concat(param);
-    console.log("config.url :>> ", config.url);
     await axios
       .request(config)
       .then((response) => {
+        if (searchParam.pageNo == 0) setLoading({ ...loading, loading: false });
+        else if (searchParam.pageNo > 0) setLoading({ ...loading, loadingNextPage: false });
+
         // setListApartmentForRent(...listApartmentForRent, ...contentRsp);
         let contentRsp = listApartmentForRent.concat(response.data.content);
         if (searchParam.pageNo == 0) setListApartmentForRent(response.data.content);
@@ -168,6 +173,7 @@ export default function TabViewHome(props) {
   };
   const handleOnScrollEnd = () => {
     if (pageNo < data.totalPages - 1) {
+       setLoading({ ...loading, loadingNextPage: true });
       pageNo++;
       var searchParam = { pageNo: pageNo };
       dispatch(submitSearchParamApartmentForRent(searchParam));
@@ -270,202 +276,52 @@ export default function TabViewHome(props) {
                     </View>
                   );
                 })}
+                <ActivityIndicator animating={loading.loadingNextPage} />
               </View>
             </ScrollView>
-            <View className=" w-full absolute  flex h-full flex-col justify-end ">
+            {/* <View className=" w-full absolute  flex h-full flex-col justify-end "> */}
               <MapHome />
-            </View>
+            {/* </View> */}
           </View>
         );
-      case "Saigon Park Resort":
-        return (
-          <View style={styles.shadow} className="flex-1 ">
-            <ScrollView showsVerticalScrollIndicator={false} className="mt-5">
-              <TouchableOpacity onPress={() => navigation.navigate("DetailApartment")} className=" mb-8">
-                <View className="">
-                  {ApartmentDatasHilly.map((apartment) => (
-                    <View className="mb-10" key={apartment.id}>
-                      <View>{apartment.carosel}</View>
-                      <View className="flex flex-row items-center justify-between">
-                        <Text className="underline pb-3 w-[80%] text-[18px] font-bold pt-2">{apartment.name}</Text>
-                        <View className="flex flex-row items-center gap-1">
-                          <Text>4.94</Text>
-                          <AntDesign name="star" color="orange" />
-                        </View>
-                      </View>
-                      <View className="flex flex-row gap-2 ">
-                        <Text className="font-bold">Resort:</Text>
-                        <Text>Les Hameaux de l'Orient</Text>
-                      </View>
-                      <View className="flex flex-row gap-2 py-2">
-                        <Text className="font-bold">Type:</Text>
-                        <Text>Luxury property</Text>
-                      </View>
-                      <View className="flex flex-row gap-2 mb-2">
-                        <Text className="font-bold">Apartment ID:</Text>
-                        <Text>310</Text>
-                      </View>
 
-                      <View className="max-w-[100%] overflow-hidden pb-2">
-                        <Text className="text-[15px] whitespace-nowrap overflow-ellipsis">
-                          Unique and secluded atmosphere with limitless views
-                        </Text>
-                      </View>
-                      <View className="flex flex-row gap-1 items-center mb-1">
-                        <Text className="text-[20px] font-bold">25.000</Text>
-                        <FontAwesome5 name="coins" size={20} color="orange" />
-                      </View>
-
-                      <View className="flex flex-row items-center ">
-                        <Text className="font-bold">5 Night : </Text>
-                        <Text className="font-bold">23rd - 28nd August</Text>
-                      </View>
-                    </View>
-                  ))}
-                </View>
-              </TouchableOpacity>
-            </ScrollView>
-            <View className=" w-full absolute  flex h-full flex-col justify-end ">
-              <MapHome />
-            </View>
-          </View>
-        );
-      case "Lakeview Villa":
-        return (
-          <View style={styles.shadow} className="flex-1 ">
-            <ScrollView showsVerticalScrollIndicator={false} className="mt-5">
-              <TouchableOpacity onPress={() => navigation.navigate("DetailApartment")} className=" mb-8">
-                <View className="">
-                  {ApartmentDatasOcean.map((apartment) => (
-                    <View className="mb-10" key={apartment.id}>
-                      <View>{apartment.carosel}</View>
-                      <View className="flex flex-row items-center justify-between">
-                        <Text className="underline pb-3 w-[80%] text-[18px] font-bold pt-2">{apartment.name}</Text>
-                        <View className="flex flex-row items-center gap-1">
-                          <Text>4.94</Text>
-                          <AntDesign name="star" color="orange" />
-                        </View>
-                      </View>
-                      <View className="flex flex-row gap-2 ">
-                        <Text className="font-bold">Resort:</Text>
-                        <Text>Les Hameaux de l'Orient</Text>
-                      </View>
-                      <View className="flex flex-row gap-2 py-2">
-                        <Text className="font-bold">Type:</Text>
-                        <Text>Luxury property</Text>
-                      </View>
-                      <View className="flex flex-row gap-2 mb-2">
-                        <Text className="font-bold">Apartment ID:</Text>
-                        <Text>310</Text>
-                      </View>
-
-                      <View className="max-w-[100%] overflow-hidden pb-2">
-                        <Text className="text-[15px] whitespace-nowrap overflow-ellipsis">
-                          Unique and secluded atmosphere with limitless views
-                        </Text>
-                      </View>
-                      <View className="flex flex-row gap-1 items-center mb-1">
-                        <Text className="text-[20px] font-bold">25.000</Text>
-                        <FontAwesome5 name="coins" size={20} color="orange" />
-                      </View>
-
-                      <View className="flex flex-row items-center ">
-                        <Text className="font-bold">5 Night : </Text>
-                        <Text className="font-bold">23rd - 28nd August</Text>
-                      </View>
-                    </View>
-                  ))}
-                </View>
-              </TouchableOpacity>
-            </ScrollView>
-            <View className=" w-full absolute  flex h-full flex-col justify-end ">
-              <MapHome />
-            </View>
-          </View>
-        );
-      case "Resort InterContinental Danang ":
-        return (
-          <View style={styles.shadow} className="flex-1 ">
-            <ScrollView showsVerticalScrollIndicator={false} className="mt-5">
-              <TouchableOpacity onPress={() => navigation.navigate("DetailApartment")} className=" mb-8">
-                <View className="">
-                  {ApartmentDatasCity.map((apartment) => (
-                    <View className="mb-10" key={apartment.id}>
-                      <View>{apartment.carosel}</View>
-                      <View className="flex flex-row items-center justify-between">
-                        <Text className="underline pb-3 w-[80%] text-[18px] font-bold pt-2">{apartment.name}</Text>
-                        <View className="flex flex-row items-center gap-1">
-                          <Text>4.94</Text>
-                          <AntDesign name="star" color="orange" />
-                        </View>
-                      </View>
-                      <View className="flex flex-row gap-2 ">
-                        <Text className="font-bold">Resort:</Text>
-                        <Text>Les Hameaux de l'Orient</Text>
-                      </View>
-                      <View className="flex flex-row gap-2 py-2">
-                        <Text className="font-bold">Type:</Text>
-                        <Text>Luxury property</Text>
-                      </View>
-                      <View className="flex flex-row gap-2 mb-2">
-                        <Text className="font-bold">Apartment ID:</Text>
-                        <Text>310</Text>
-                      </View>
-
-                      <View className="max-w-[100%] overflow-hidden pb-2">
-                        <Text className="text-[15px] whitespace-nowrap overflow-ellipsis">
-                          Unique and secluded atmosphere with limitless views
-                        </Text>
-                      </View>
-                      <View className="flex flex-row gap-1 items-center mb-1">
-                        <Text className="text-[20px] font-bold">25.000</Text>
-                        <FontAwesome5 name="coins" size={20} color="orange" />
-                      </View>
-
-                      <View className="flex flex-row items-center ">
-                        <Text className="font-bold">5 Night : </Text>
-                        <Text className="font-bold">23rd - 28nd August</Text>
-                      </View>
-                    </View>
-                  ))}
-                </View>
-              </TouchableOpacity>
-            </ScrollView>
-            <View className=" w-full absolute  flex h-full flex-col justify-end ">
-              <MapHome />
-            </View>
-          </View>
-        );
       default:
         return null;
     }
   };
 
   return (
-    <View className="flex-1 px-4 bg-white">
-      {/* <Text>{paramSearch?.sortDirection}</Text> */}
-      <View className=" border-b border-blue-200 ">
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View className="flex flex-row gap-10 ">
-            {tabs.map((tab) => (
-              <TouchableOpacity
-                className="pb-3"
-                key={tab}
-                onPress={() => setSelectedTab(tab)}
-                style={[
-                  styles.tabButton,
-                  {
-                    borderBottomWidth: selectedTab === tab ? 2 : 0,
-                    borderBottomColor: selectedTab === tab ? "#009FC2" : "transparent",
-                  },
-                ]}>
-                <Text style={selectedTab === tab ? { color: "#007FC4" } : {}}>{tab}</Text>
-              </TouchableOpacity>
-            ))}
+    <View style={[styles.container]}>
+      {loading.loading ? (
+        <ActivityIndicator animating={loading.loading} />
+      ) : (
+        // {/* <Text>{paramSearch?.sortDirection}</Text> */}
+        <View className="flex-1 px-4 bg-white">
+          <View className=" border-b border-blue-200 ">
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View className="flex flex-row gap-10 ">
+                {tabs.map((tab) => (
+                  <TouchableOpacity
+                    className="pb-3"
+                    key={tab}
+                    onPress={() => setSelectedTab(tab)}
+                    style={[
+                      styles.tabButton,
+                      {
+                        borderBottomWidth: selectedTab === tab ? 2 : 0,
+                        borderBottomColor: selectedTab === tab ? "#009FC2" : "transparent",
+                      },
+                    ]}>
+                    <Text style={selectedTab === tab ? { color: "#007FC4" } : {}}>{tab}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ScrollView>
           </View>
-        </ScrollView>
-      </View>
-      {renderTabContent()}
+
+          {renderTabContent()}
+        </View>
+      )}
     </View>
   );
 }
@@ -480,5 +336,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.27,
     shadowRadius: 4.65,
     elevation: 6,
+  },
+  container: {
+    flex: 1,
+    justifyContent: "center",
   },
 });

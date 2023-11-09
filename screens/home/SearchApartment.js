@@ -36,7 +36,7 @@ export default function SearchApartment(props) {
     };
     console.log("searchParam :>> ", searchParam);
     dispatch(submitSearchParamApartmentForRent(searchParam));
-    navigation.navigate("Homes");
+    navigation.navigate("Home");
   };
   const onClearForm = () => {
     setLocationName("");

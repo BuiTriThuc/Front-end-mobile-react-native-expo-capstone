@@ -45,7 +45,7 @@ export default function SignInScreen() {
           <View className="-ml-[130px] mr-[70px]">
             <TouchableOpacity
               className="w-[55px] h-[55px] bg-[#D9D5D5] rounded-full flex justify-center items-center "
-              onPress={() => navigation.goBack()}
+              onPress={() => navigation.navigate("Home")}
             >
               <AntDesign name="arrowleft" size={20} color="#AAAAAA" />
             </TouchableOpacity>
