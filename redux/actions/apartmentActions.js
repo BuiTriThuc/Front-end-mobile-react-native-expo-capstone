@@ -38,11 +38,9 @@ export const getApartments =
 
       const { data } = await axios.get(link, config);
 
-      console.log("Check data redux", data);
-
       dispatch({ type: GET_APARTMENT_SUCCESS, payload: data });
     } catch (error) {
-      console.log("Check error", error);
+      console.log("Check error", error.response.data.message);
       dispatch({ type: GET_APARTMENT_FAIL, payload: error });
     }
   };

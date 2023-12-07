@@ -30,7 +30,11 @@ import blogReducers, {
   likePostReducer,
 } from "./reducers/blogReducers";
 import signupReducer from "./reducers/signupReducer";
-import { dateRangeReducer } from "./reducers/dateRangeReducers";
+import {
+  dateRangeDefaultReducer,
+  dateRangeOutReducer,
+  dateRangeReducer,
+} from "./reducers/dateRangeReducers";
 import {
   createRatingBookingReducer,
   ratingsReducer,
@@ -68,6 +72,8 @@ export const store = configureStore({
     pushNotification: notificationReducer,
     conversation: conversationReducer,
     // dislikePost: dislikePostReducer,
+    dateRangeDefault: dateRangeDefaultReducer,
+    dateOut: dateRangeOutReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
