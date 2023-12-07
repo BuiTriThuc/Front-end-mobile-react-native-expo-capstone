@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Mobile-capstone-project",
-    "slug": "holidayswap",
+    "slug": "holiday-swap",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -11,7 +11,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
@@ -20,7 +22,9 @@
       "bundleIdentifier": "com.thucbui.captone"
     },
     "android": {
-      "blockedPermissions": ["android.permission.RECORD_AUDIO"],
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -32,8 +36,9 @@
     },
     "extra": {
       "eas": {
-        "projectId": "7895ebe4-c50f-48ed-aa18-1b93129eecb8"
+        "projectId": "7e42f8be-22e5-4738-8166-bc5e5d0f2203"
       }
-    }
+    },
+    "owner": "hungpd17"
   }
 }

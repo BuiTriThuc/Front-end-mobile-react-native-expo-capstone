@@ -35,6 +35,8 @@ import {
   createRatingBookingReducer,
   ratingsReducer,
 } from "./reducers/ratingReducers";
+import notificationReducer from "./slices/pushNotificationSlice";
+import conversationReducer from "./slices/conversationSlice";
 
 export const store = configureStore({
   reducer: {
@@ -63,6 +65,8 @@ export const store = configureStore({
     dateRangeBooking: dateRangeReducer,
     ratings: ratingsReducer,
     createRatingBooking: createRatingBookingReducer,
+    pushNotification: notificationReducer,
+    conversation: conversationReducer,
     // dislikePost: dislikePostReducer,
   },
   middleware: (getDefaultMiddleware) =>
