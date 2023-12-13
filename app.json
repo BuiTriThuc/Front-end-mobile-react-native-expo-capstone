@@ -42,6 +42,11 @@
     },
     "updates": {
       "url": "https://u.expo.dev/7895ebe4-c50f-48ed-aa18-1b93129eecb8"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "7895ebe4-c50f-48ed-aa18-1b93129eecb8"
+      }
     }
   },
   "name": "HolidaySwap",
