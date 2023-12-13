@@ -9,7 +9,7 @@ import { useNavigation } from "@react-navigation/native";
 import SearchBar from "../../components/search/SearchBar";
 import { Image } from "react-native";
 import { ScrollView } from "react-native";
-import TabViewMessageAndNotification from "../../components/messNotifi/TabViewMessageAndNotification";
+import TabViewMessageAndNotification from "../../components/notification/TabViewMessageAndNotification";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function ChatScreen() {

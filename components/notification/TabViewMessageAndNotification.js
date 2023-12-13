@@ -1,23 +1,26 @@
 import {AntDesign, FontAwesome5} from "@expo/vector-icons";
-import React, {useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import {
     View,
     Text,
     TouchableOpacity,
     ScrollView,
     StyleSheet,
-    Image,
+    Image, FlatList,
 } from "react-native";
 import {useFocusEffect, useNavigation} from "@react-navigation/native";
 import CarouselApartmentHome from "../apartment/CaroselApartmentHome";
 import SearchBar from "../search/SearchBar";
 import {useDispatch, useSelector} from "react-redux";
 import {NotificationApis} from "../../apis/NotificationApis";
-import {fetchNotifications} from "../../redux/slices/pushNotificationSlice";
+import {fetchNotifications, readNotificationById} from "../../redux/slices/pushNotificationSlice";
 import {formatRelative} from "date-fns";
 import {fetchConversations, setConversationLoaded} from "../../redux/slices/conversationSlice";
 import ConversationApis from "../../apis/ConversationApis";
 import {UserApis} from "../../apis/UserApis";
+import Swipable from "./swipable";
+import NotificationWidget from "./notificationWidget";
+import Loading from "../Loading";
 
 const getAvatarSource = (item, currentUser) => {
     const defaultAvatar = `https://ui-avatars.com/api/?name=${item.conversationName}`;
@@ -35,15 +38,55 @@ export default function TabViewMessageAndNotification() {
     const [loading, setLoading] = useState(false);
     const notifications = useSelector((state) => state.pushNotification.data);
     const conversations = useSelector((state) => state.conversation.data);
+    const conversationLoaded = useSelector((state) => state.conversation.loaded);
     const [currentUser, setCurrentUser] = useState();
+    const [searchText, setSearchText] = useState('');
     const dispatch = useDispatch();
+    const [conversationList, setConversationList] = useState([]);
+
+    const fetchConversationData = useCallback(() => {
+        ConversationApis.getCurrentUserConversation().then((res) => {
+            const result = searchText ? filterConversationsByKeyword(res, searchText) : res;
+            setConversationList(result);
+        });
+    }, [searchText]);
+
+    const handleSearchConversation = () => {
+        dispatch(setConversationLoaded(false));
+        fetchConversationData();
+        if (searchText) {
+            const result = filterConversationsByKeyword(conversationList, searchText);
+            setConversationList(result);
+        } else {
+            fetchConversationData();
+        }
+        dispatch(setConversationLoaded(true));
+    };
+
+    const filterConversationsByKeyword = (conversations, keyword) => {
+        return conversations?.filter(
+            (item) =>
+                item?.conversationName?.toString()?.toLowerCase()?.trim()
+                    ?.includes(keyword?.toLowerCase()?.trim())
+                ||
+                item?.participants?.find((participant) =>
+                    participant?.user?.username?.toString()?.toLowerCase()
+                        ?.includes(keyword?.toLowerCase()?.trim())
+                )
+        );
+    };
+
+    useEffect(() => {
+        const result = searchText ? filterConversationsByKeyword(conversations, searchText)
+            : conversations;
+        setConversationList(result);
+    }, [conversations]);
 
     useFocusEffect(
         React.useCallback(() => {
             setLoading(true);
             NotificationApis.getAll().then((res) => {
                 dispatch(fetchNotifications(res));
-                // console.log("Check notification", res);
             });
             dispatch(setConversationLoaded(false));
             ConversationApis.getCurrentUserConversation().then((res) => {
@@ -52,25 +95,60 @@ export default function TabViewMessageAndNotification() {
             });
             UserApis.getCurrentProfile().then((res) => {
                 setCurrentUser(res);
-                // console.log("Check user", res);
             });
             setLoading(false)
         }, [dispatch])
     );
+
+    useEffect(() => {
+        fetchConversationData();
+    }, [fetchConversationData]);
+
+    const [selectedIndex, setSelectedIndex] = useState(undefined);
+
+
+    const handleDelete = (deletedNotificationId, isApplicable) => {
+        setTimeout(
+            () => {
+                const filteredList = notifications.filter((item) => item?.notificationId?.toString() !== deletedNotificationId?.toString());
+                deletedNotificationId && NotificationApis.deleteById(deletedNotificationId)
+                    .catch((error) => {
+                            console.log(error);
+                        }
+                    )
+                dispatch(fetchNotifications(filteredList));
+            },
+            600
+        )
+    };
+
+    const handleRead = (notificationId) => {
+        dispatch(readNotificationById(notificationId));
+        NotificationApis.readById(notificationId)
+            .catch((error) => {
+                    console.log(error);
+                }
+            )
+    };
+
+    useEffect(() => {
+        handleSearchConversation();
+    }, [searchText]);
+
 
     const renderTabContent = () => {
         switch (selectedTab) {
             case "Chat":
                 return (
                     <View>
-                        <SearchBar/>
+                        <SearchBar onChangeText={setSearchText} searchText={searchText}/>
                         <ScrollView
                             showsVerticalScrollIndicator={false}
                             className="w-[95%] py-3"
                         >
-                            {conversations &&
-                                (conversations?.length !== 0 ? (
-                                    conversations?.map((item, index) => (
+                            {conversationList && conversationLoaded ?
+                                (conversationList?.length !== 0 ? (
+                                    conversationList?.map((item, index) => (
                                         <TouchableOpacity
                                             key={item?.conversationId}
                                             className="flex flex-row items-center w-full py-4 gap-2 px-3"
@@ -90,6 +168,7 @@ export default function TabViewMessageAndNotification() {
                                                 })
                                             }
                                         >
+
                                             <Image
                                                 className="mr-[8px] rounded-full w-[60] h-[60] mb-[20px]"
                                                 source={{uri: getAvatarSource(item, currentUser)}}
@@ -139,73 +218,37 @@ export default function TabViewMessageAndNotification() {
                                             "It's time to start a new conversation and connect with someone."
                                         </Text>
                                     </View>
-                                ))}
+                                )) : <Loading/>}
                         </ScrollView>
                     </View>
                 );
             case "Notifications":
                 return (
                     <View style={styles.shadow} className="flex-1 ">
-                        <ScrollView showsVerticalScrollIndicator={false}>
-                            {notifications && (notifications?.length !== 0 ? (
-                                notifications?.map((item, index) => (
-                                    <TouchableOpacity
-                                        key={`notification-${index}`}
-                                        className="flex flex-row items-center w-full py-4 gap-2 px-3"
-                                    >
-                                        <AntDesign
-                                            name="notification"
-                                            size={32}
-                                            color={`${item?.isRead ? 'gray' : '#ff3030'}`}
-                                        />
-                                        <View className="w-full pr-3 flex flex-col gap-2">
-                                            <Text
-                                                className="text-[15px] font-bold text-ellipsis overflow-hidden text-gray-900 dark:text-white"
-                                            >
-                                                {item?.subject}
-                                            </Text>
-                                            <Text
-                                                className="text-ellipsis overflow-hidden text-sm text-gray-400 dark:text-zinc-400"
-                                            >
-                                                {item?.content}
-                                            </Text>
-                                            <View className="flex flex-row items-center pr-3">
-                                                <Text
-                                                    className="text-xs text-blue-600 dark:text-blue-500"
-                                                >
-                                                    {formatRelative(
-                                                        new Date(item?.createdOn),
-                                                        new Date()
-                                                    )}
-                                                </Text>
-                                                {!item?.isRead && (
-                                                    <View
-                                                        style={{
-                                                            backgroundColor: 'green',
-                                                            width: 8,
-                                                            height: 8,
-                                                            borderRadius: 4,
-                                                            marginLeft: 12,
-                                                            marginRight: 3,
-                                                            marginTop: 3,
-                                                            marginBottom: 3,
-                                                        }}
-                                                    />
-                                                )}
-                                            </View>
-                                        </View>
-                                    </TouchableOpacity>
-                                ))
-                            ) : (
-                                <View className="px-4">
-                                    <Text className="text-[20px] py-3 font-bold">
-                                        No notification.
-                                    </Text>
-                                </View>
-                            ))}
-                        </ScrollView>
+                        <View style={styles.container}>
+                            <FlatList
+                                data={notifications}
+                                extraData={notifications.length}
+                                keyExtractor={(item, index) => index.toString()}
+                                renderItem={({item, index}) => (
+                                    <Swipable
+                                        key={item?.notificationId}
+                                        index={index}
+                                        isRead={item?.isRead}
+                                        {...item}
+                                        handleRead={handleRead}
+                                        notificationId={item?.notificationId}
+                                        backgroundColor={item.isRead ? '#f51b53' : '#ff3030'}
+                                        handleDelete={handleDelete}
+                                        setSelectedIndex={setSelectedIndex}
+                                        selectedIndex={selectedIndex}
+                                        totalConversation={notifications.length}>
+                                        <NotificationWidget {...item} onPress={handleRead}/>
+                                    </Swipable>
+                                )}
+                            />
+                        </View>
                     </View>
-
                 );
 
             default:
@@ -216,34 +259,33 @@ export default function TabViewMessageAndNotification() {
     return (
         <View className="flex-1 px-4 bg-white">
             <View>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    <View className="flex flex-row gap-6">
-                        {tabs.map((tab) => (
-                            <TouchableOpacity
-                                className="pb-1"
-                                key={tab}
-                                onPress={() => setSelectedTab(tab)}
-                                style={[
-                                    styles.tabButton,
-                                    {
-                                        borderBottomWidth: selectedTab === tab ? 2 : 0,
-                                        borderBottomColor:
-                                            selectedTab === tab ? "#009FC2" : "transparent",
-                                    },
-                                ]}
+
+                <View className="flex flex-row gap-6">
+                    {tabs?.map((tab) => (
+                        <TouchableOpacity
+                            className="pb-1"
+                            key={tab}
+                            onPress={() => setSelectedTab(tab)}
+                            style={[
+                                styles.tabButton,
+                                {
+                                    borderBottomWidth: selectedTab === tab ? 2 : 0,
+                                    borderBottomColor:
+                                        selectedTab === tab ? "#009FC2" : "transparent",
+                                },
+                            ]}
+                        >
+                            <Text
+                                className="text-[15px] font-bold mt-3"
+                                style={selectedTab === tab ? {color: "#007FC4"} : {}}
                             >
-                                <Text
-                                    className="text-[15px] font-bold mt-3"
-                                    style={selectedTab === tab ? {color: "#007FC4"} : {}}
-                                >
-                                    {tab}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-                </ScrollView>
+                                {tab}
+                            </Text>
+                        </TouchableOpacity>
+                    ))}
+                </View>
             </View>
-            {!loading && renderTabContent()}
+            {loading ? (<Loading/>) : renderTabContent()}
         </View>
     );
 }
@@ -259,4 +301,10 @@ const styles = StyleSheet.create({
         shadowRadius: 4.65,
         elevation: 6,
     },
+    container: {
+        backgroundColor: 'white',
+        borderTopLeftRadius: 25,
+        borderTopRightRadius: 25,
+    },
 });
+
