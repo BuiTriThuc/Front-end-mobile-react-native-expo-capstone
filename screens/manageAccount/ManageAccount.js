@@ -13,30 +13,54 @@ import { View } from "react-native-animatable";
 import UploadImage from "../../components/addApartment/UploadImage";
 import UploadImageProfile from "./UploadImageProfile";
 import { launchImageLibrary } from "react-native-image-picker";
+import DateTimePicker, {
+  DateTimePickerAndroid,
+} from "@react-native-community/datetimepicker";
+import { format, setHours } from "date-fns";
+import {
+  UPDATE_PASSWORD_RESET,
+  UPDATE_PROFILE_RESET,
+} from "../../redux/constants/userConstants";
+import Toast from "react-native-toast-message";
+import { Dropdown } from "react-native-element-dropdown";
 
 export default function ManageAccount() {
   const { user, userProfile, loading, error, isAuthenticated } = useSelector(
     (state) => state.user
   );
 
-  const { success, isUpdated } = useSelector((state) => state.profile);
+  const data = [
+    { label: "MALE", value: "MALE" },
+    { label: "FEMALE", value: "FEMALE" },
+    { label: "OTHER", value: "OTHER" },
+  ];
+
+  const {
+    success,
+    isUpdated,
+    error: errorProfile,
+  } = useSelector((state) => state.profile);
+
+  const [date, setDate] = useState(new Date(...userProfile.dob));
+  const [show, setShow] = useState(false);
+  const [mode, setMode] = useState("date");
 
   const dispatch = useDispatch();
-  const [avatar, setAvatar] = useState(userProfile?.avatar);
+  const [avatar, setAvatar] = useState(userProfile?.avatar ?? null);
   const [avatarSubmit, setAvatarSubmit] = useState();
-  const [fullName, setFullName] = useState(userProfile?.fullName);
+  const [fullName, setFullName] = useState(
+    userProfile?.fullName ?? "Trong Tin"
+  );
   const [dob, setDob] = useState(userProfile?.dob);
   const [gender, setGender] = useState(userProfile?.gender);
 
   const handleSaveProfile = () => {
     const userData = {
-      avatar: avatarSubmit ?? userProfile.avatar,
+      avatar: avatarSubmit ?? userProfile?.avatar,
       fullName: fullName,
       gender: gender,
-      dob: dob,
+      dob: new Date(date).setHours(0, 0, 0, 0),
     };
-
-    console.log("Check user data", userData);
 
     dispatch(updateProfile(userData));
   };
@@ -44,19 +68,61 @@ export default function ManageAccount() {
   useEffect(() => {
     if (success === true) {
       navigation.navigate("root");
+      Toast.show({
+        type: "success",
+        text1: "Edit Profile",
+        text2: "Edit profile success",
+      });
+      dispatch({ type: UPDATE_PROFILE_RESET });
     }
-  }, [success, navigation]);
+
+    if (errorProfile) {
+      Toast.show({
+        type: "error",
+        text1: "Edit profile",
+        text2: errorProfile,
+      });
+      dispatch({ type: UPDATE_PROFILE_RESET });
+    }
+  }, [success, navigation, dispatch, errorProfile]);
 
   const navigation = useNavigation();
-
-  console.log("Check profile in edit", userProfile);
 
   const handleChangeImage = (value) => {
     setAvatar(Object.assign({}, value));
     setAvatarSubmit(Object.assign({}, value));
   };
 
-  console.log("Check avatar", avatar);
+  const onChange = (event, selectedDate) => {
+    const currentDate = selectedDate;
+    setShow(false);
+    setDate(currentDate);
+  };
+
+  const showMode = (currentMode) => {
+    DateTimePickerAndroid.open({
+      value: date,
+      onChange,
+      mode: currentMode,
+      is24Hour: true,
+    });
+  };
+
+  const showDatepicker = () => {
+    showMode("date");
+  };
+
+  const showTimepicker = () => {
+    showMode("time");
+  };
+
+  const renderItem = (item) => {
+    return (
+      <View style={stylesDropdown.item}>
+        <Text style={stylesDropdown.textItem}>{item.label}</Text>
+      </View>
+    );
+  };
 
   return (
     <View className="flex-1">
@@ -72,7 +138,11 @@ export default function ManageAccount() {
           <View className="flex flex-row items-center py-5 gap-5">
             <Image
               className="w-16 h-16 rounded-full"
-              source={{ uri: avatar["0"]["uri"] || userProfile?.avatar }}
+              source={
+                userProfile.avatar || avatar["0"]["uri"]
+                  ? { uri: avatar["0"]["uri"] || userProfile?.avatar }
+                  : require("../../assets/images/avatar.png")
+              }
             />
 
             <TextInput
@@ -100,8 +170,8 @@ export default function ManageAccount() {
               // onChangeText={handleInputChange}
               keyboardType="numbers-and-punctuation"
               className=" bg-transparent w-[100%] border-b border-gray-400"
-              value={dob}
-              onChangeText={(text) => setDob(text)}
+              value={format(date, "dd-MM-yyyy")}
+              onPressIn={showDatepicker}
             />
           </View>
 
@@ -115,12 +185,24 @@ export default function ManageAccount() {
             />
           </View> */}
           <View className="my-5">
-            <TextInput
-              // onChangeText={handleInputChange}
-              className="w-[100%] border-b border-gray-400 bg-transparent"
-              label="Gender"
+            <Dropdown
+              style={stylesDropdown.dropdown}
+              placeholderStyle={stylesDropdown.placeholderStyle}
+              selectedTextStyle={stylesDropdown.selectedTextStyle}
+              inputSearchStyle={stylesDropdown.inputSearchStyle}
+              iconStyle={stylesDropdown.iconStyle}
+              data={data}
+              search
+              maxHeight={270}
+              labelField="propertyName"
+              valueField="value"
+              placeholder="Select gender"
+              searchPlaceholder="Search..."
               value={gender}
-              onChangeText={(text) => setGender(text)}
+              onChange={(item) => {
+                setGender(item.value);
+              }}
+              renderItem={renderItem}
             />
           </View>
         </View>
@@ -139,10 +221,20 @@ export default function ManageAccount() {
           </TouchableOpacity>
         </View>
         <TouchableOpacity onPress={handleSaveProfile}>
-          <Text className="text-[20px] bg-blue-500 p-3 text-center text-white mx-2 my- font-bold">
+          <Text className="text-[20px] bg-blue-500 p-3 text-center text-white mx-2 mb-2 font-bold">
             Save
           </Text>
         </TouchableOpacity>
+
+        {show && (
+          <DateTimePicker
+            testID="dateTimePicker"
+            value={date}
+            mode={mode}
+            is24Hour={true}
+            onChange={onChange}
+          />
+        )}
       </ScrollView>
     </View>
   );
@@ -158,5 +250,51 @@ const styles = StyleSheet.create({
     shadowRadius: 4.65,
 
     elevation: 6,
+  },
+});
+
+const stylesDropdown = StyleSheet.create({
+  dropdown: {
+    margin: 16,
+    height: 50,
+    backgroundColor: "white",
+    borderRadius: 12,
+    padding: 12,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
+
+    elevation: 2,
+  },
+  icon: {
+    marginRight: 5,
+  },
+  item: {
+    padding: 17,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  textItem: {
+    flex: 1,
+    fontSize: 16,
+  },
+  placeholderStyle: {
+    fontSize: 16,
+  },
+  selectedTextStyle: {
+    fontSize: 16,
+  },
+  iconStyle: {
+    width: 20,
+    height: 20,
+  },
+  inputSearchStyle: {
+    height: 40,
+    fontSize: 16,
   },
 });

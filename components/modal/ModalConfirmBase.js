@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Modal } from "react-native";
+import { View, Modal, TouchableOpacity } from "react-native";
 import Button from "../button/Button";
 import { Text } from "react-native";
 import * as Icon from "react-native-feather";
@@ -25,7 +25,17 @@ const ModalConfirmBase = ({
             <Text className="mb-4 text-center text-3xl font-black">
               {context}
             </Text>
-            <Button text={"Continue"} onPress={onPress} />
+            <View className="flex flex-row gap-3">
+              <TouchableOpacity
+                onPress={() => setModalVisible(false)}
+                className="px-5 py-2 rounded-md bg-red-100 flex my-4 mx-4"
+              >
+                <Text className="text-center justify-center font-bold text-red-300 text-xl">
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+              <Button text={"Continue"} onPress={onPress} />
+            </View>
           </View>
         </View>
       </Modal>

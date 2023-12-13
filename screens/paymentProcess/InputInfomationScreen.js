@@ -1,8 +1,13 @@
 import { AntDesign, FontAwesome5, Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import React, { useState } from "react";
-import { TextInput, Image, StyleSheet, Alert } from "react-native";
-import { TouchableOpacity } from "react-native";
+import {
+  TextInput,
+  Image,
+  StyleSheet,
+  Alert,
+  TouchableOpacity,
+} from "react-native";
 import { ScrollView } from "react-native";
 import { Text, CheckBox } from "react-native";
 import { View } from "react-native-animatable";
@@ -26,6 +31,8 @@ import { Fragment } from "react";
 import Loading from "../../components/Loading";
 import validator from "validator";
 import ModalConfirmBase from "./../../components/modal/ModalConfirmBase";
+import Toast from "react-native-toast-message";
+// import { TouchableOpacity } from "react-native-gesture-handler";
 
 export default function InputInfomationScreen() {
   const navigation = useNavigation();
@@ -37,7 +44,6 @@ export default function InputInfomationScreen() {
   const [visibleCalendar, setVisibleCalendar] = useState(false);
   const [visibleGuest, setVisibleGuest] = useState(false);
   const [visibleModal, setVisibleModal] = useState(false);
-  // const [dateRangeBooking, setDateRangeBooking] = useState(dateRange);
 
   const [apartmentAllowGuest, setApartmentAllowGuest] = useState(
     apartmentBooking?.property?.numberKingBeds * 2 +
@@ -197,10 +203,13 @@ export default function InputInfomationScreen() {
   };
 
   useEffect(() => {
-    dispatch(loadUser());
     if (error) {
       setVisibleModal(false);
-      console.log("Error booking", error);
+      Toast.show({
+        type: "error",
+        text1: "Booking",
+        text2: error,
+      });
     }
 
     if (success) {
@@ -217,7 +226,7 @@ export default function InputInfomationScreen() {
           ),
       });
     }
-  }, [error, success, dispatch, navigation]);
+  }, [error, success, dispatch, navigation, dateRangeRedux, apartmentBooking]);
 
   return (
     <Fragment>
@@ -232,7 +241,7 @@ export default function InputInfomationScreen() {
             <Text className="ml-8 text-[20px] text-white">Confirm and pay</Text>
           </View>
           <ScrollView className="flex-1">
-            <View className="flex flex-row gap-5 bg-white px-4  py-5">
+            <View className="flex flex-row gap-5 bg-white px-4 py-5">
               <Image
                 source={{
                   uri: `${apartmentBooking?.property?.propertyImage[0].link}`,
@@ -240,22 +249,26 @@ export default function InputInfomationScreen() {
                 className="h-40 w-44 rounded-lg"
               />
 
-              <View className="flex flex-col justify-between">
-                <Text className="text-base font-bold w-[80%]">
-                  {apartmentBooking?.property?.resort.resortName}
-                </Text>
-                <Text className="text-lg font-bold w-[40%]">
-                  {apartmentBooking?.property?.propertyName}
-                </Text>
-                <View className="flex flex-row items-center">
-                  <Text>Apartment ID: </Text>
-                  <Text className="font-bold">
-                    {apartmentBooking?.coOwnerId.roomId}
+              <View className="flex flex-col justify-evenly">
+                <View>
+                  <Text className="text-[15px] font-bold ">Resort: </Text>
+                  <Text className="w-[80%]">
+                    {apartmentBooking?.property?.resort.resortName}
                   </Text>
                 </View>
-                <Text className=" font-normal">
+                <View>
+                  <Text className="text-[15px] font-bold">Property:</Text>
+                  <Text className=" w-[90%]">
+                    {apartmentBooking?.property?.propertyName}
+                  </Text>
+                </View>
+                <View className="flex flex-row items-center">
+                  <Text className="font-bold">Apartment ID: </Text>
+                  <Text className="">{apartmentBooking?.coOwnerId.roomId}</Text>
+                </View>
+                {/* <Text className=" font-normal">
                   {apartmentBooking?.property?.propertyDescription}
-                </Text>
+                </Text> */}
 
                 {/* <Text className="flex flex-row gap-1 items-center ">
                   <StarIcon size={30} color={"yellow"} />
@@ -349,23 +362,46 @@ export default function InputInfomationScreen() {
             </View>
 
             <View className="bg-white w-full py-5 px-5 mt-2">
-              <Text className="text-xl py-4 font-bold">Price details</Text>
-              <View className="py-3 flex flex-row justify-between items-center">
-                <Text className="text-lg text-slate-600">
-                  {apartmentBooking?.availableTime?.pricePerNight} point x{" "}
-                  {calculateNightDifference(
-                    dateRangeRedux.startTimeBooking,
-                    dateRangeRedux.endTimeBooking
-                  )}
-                </Text>
-                <Text className="text-lg text-slate-600">
-                  {apartmentBooking?.availableTime?.pricePerNight *
-                    calculateNightDifference(
-                      dateRangeRedux.startTimeBooking,
-                      dateRangeRedux.endTimeBooking
-                    )}{" "}
-                  point
-                </Text>
+              <Text className="text-lg  font-bold">Price details</Text>
+              <View className="mt-3">
+                <View className="flex flex-row items-center gap-2 mb-2">
+                  <View className="flex flex-row items-center  ">
+                    <Text className="text-lg font-bold mr-1">
+                      {apartmentBooking?.availableTime?.pricePerNight}
+                    </Text>
+                    <FontAwesome5 name="coins" size={15} color="orange" />
+                  </View>
+                  <Text className="text-lg font-bold">/</Text>
+                  <Text className="font-bold">Night</Text>
+                </View>
+                <View className="pb-3 flex flex-row justify-between items-center">
+                  <View className=" flex flex-row items-center gap-2 ">
+                    <Text className="text-lg font-bold">
+                      {apartmentBooking?.availableTime?.pricePerNight}{" "}
+                      <FontAwesome5 name="coins" size={15} color="orange" />
+                    </Text>
+                    <Text className="text-lg">x</Text>
+                    <View className=" flex flex-row items-center gap-1">
+                      <Text className="text-lg font-bold">
+                        {calculateNightDifference(
+                          dateRangeRedux.startTimeBooking,
+                          dateRangeRedux.endTimeBooking
+                        )}
+                      </Text>
+                      <Text className="text-lg font-bold">night</Text>
+                    </View>
+                  </View>
+                  <View className="flex flex-row items-center gap-2">
+                    <Text className="text-lg font-bold">
+                      {apartmentBooking?.availableTime?.pricePerNight *
+                        calculateNightDifference(
+                          dateRangeRedux.startTimeBooking,
+                          dateRangeRedux.endTimeBooking
+                        )}
+                    </Text>
+                    <FontAwesome5 name="coins" size={15} color="orange" />
+                  </View>
+                </View>
               </View>
             </View>
 
@@ -464,12 +500,6 @@ export default function InputInfomationScreen() {
                 </View>
               </View>
             </BottomSheet>
-
-            <ModalConfirmBooking
-              modalVisible={visibleModal}
-              setModalVisible={setVisibleModal}
-            />
-
             <View className="mt-2">
               {/* <View className="bg-white mb-2 px-2 rounded-md mt-2">
             <View className="py-4">
@@ -526,7 +556,7 @@ export default function InputInfomationScreen() {
             </View>
           </View> */}
               <View className="bg-white px-4">
-                <Text className="font-bold text-[18px] py-3">
+                <Text className="font-bold text-lg py-3">
                   Guest information
                 </Text>
 
@@ -603,7 +633,7 @@ export default function InputInfomationScreen() {
             </View>
 
             <ModalConfirmBase
-              context={"Are you sure want to booking"}
+              context={"Are you sure want to booking?"}
               modalVisible={visibleModal}
               setModalVisible={setVisibleModal}
               onPress={handleBooking}

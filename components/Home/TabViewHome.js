@@ -24,11 +24,9 @@ export default function TabViewHome(props) {
   const { loading, apartments } = useSelector((state) => state.apartments);
   const dispatch = useDispatch();
 
-  useFocusEffect(
-    useCallback(() => {
-      dispatch(getApartments());
-    }, [dispatch])
-  );
+  useEffect(() => {
+    dispatch(getApartments());
+  }, [dispatch]);
 
   const [selectedTab, setSelectedTab] = useState("");
   const [tabs, setTabs] = useState([]);
@@ -169,6 +167,8 @@ export default function TabViewHome(props) {
                               onPress={() =>
                                 navigation.navigate("DetailApartment", {
                                   id: item.availableTime.id,
+                                  propertyId: item.coOwnerId.propertyId,
+                                  roomId: item.coOwnerId.roomId,
                                 })
                               }
                               className="mb-8"
@@ -181,7 +181,12 @@ export default function TabViewHome(props) {
                                     </Text>
                                     {item.property.rating && ( // Check if rating is available
                                       <View className="flex flex-row items-center gap-1">
-                                        <Text> {item.property.rating}</Text>
+                                        <Text>
+                                          {" "}
+                                          {Number(item.property.rating).toFixed(
+                                            1
+                                          )}
+                                        </Text>
                                         <AntDesign name="star" color="orange" />
                                       </View>
                                     )}
@@ -206,9 +211,9 @@ export default function TabViewHome(props) {
                                     </Text>
                                   </View> */}
                                   <View className="max-w-[100%] overflow-hidden pb-2 flex flex-row gap-1">
-                                    <Text>Owner by:</Text>
+                                    <Text className="font-bold">Owner by:</Text>
                                     <Text className="text-[15px] whitespace-nowrap overflow-ellipsis">
-                                      {item.user.username}
+                                      {item?.user?.username}
                                     </Text>
                                   </View>
                                   <View className="flex flex-row gap-1 items-center mb-1">

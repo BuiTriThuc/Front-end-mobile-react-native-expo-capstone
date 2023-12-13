@@ -17,19 +17,17 @@ const YourApartment = () => {
   );
   const { userProfile } = useSelector((state) => state.user);
 
-  useFocusEffect(
-    React.useCallback(() => {
-      dispatch(loadUser());
-    }, [dispatch])
-  );
+  // useFocusEffect(
+  //   React.useCallback(() => {
+  //     dispatch(loadUser());
+  //   }, [dispatch])
+  // );
 
   useEffect(() => {
     if (userProfile) {
       dispatch(getListOwnership(userProfile.userId));
     }
   }, [dispatch, userProfile]);
-
-  console.log("check ownership", ownerships);
 
   return (
     <View>

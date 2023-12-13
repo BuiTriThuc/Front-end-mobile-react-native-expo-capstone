@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Text, TouchableOpacity, Image, ScrollView } from "react-native"; // Import Image component for displaying avatars
 import { View } from "react-native-animatable";
 import { useDispatch, useSelector } from "react-redux";
@@ -8,7 +8,11 @@ import {
   likePost,
 } from "../../redux/actions/blogAction";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
 import HTML from "react-native-render-html";
 import { format } from "date-fns";
 import { loadUser } from "../../redux/actions/userActions";
@@ -28,11 +32,7 @@ export default function BlogDetail() {
   const { dislikeSuccess } = useSelector((state) => state.dislikePost);
 
   useEffect(() => {
-    dispatch(loadUser());
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (userProfile && (success || dislikeSuccess)) {
+    if (userProfile) {
       dispatch(getBlogDetails(id, userProfile.userId));
     } else {
       dispatch(getBlogDetails(id));
@@ -61,13 +61,17 @@ export default function BlogDetail() {
           <View className="flex flex-row items-center justify-between">
             <View className="flex flex-row items-center gap-2">
               <Image
-                className="w-[50px] h-[50px]"
+                className="w-[50px] h-[50px] rounded-full"
                 source={{ uri: blog.avatar }}
               />
               <View>
                 <Text className="text-[18px] font-bold"> {blog.userName}</Text>
-                <Text className="text-[13px]">{blog?.datePosted}</Text>
-                {/* <Text>{format(new Date(blog?.datePosted), "dd-MM-yyyy")}</Text> */}
+                {/* <Text className="text-[13px]">{blog?.datePosted}</Text> */}
+                {blog?.datePosted && (
+                  <Text>
+                    {format(new Date(blog?.datePosted), "dd-MM-yyyy")}
+                  </Text>
+                )}
               </View>
             </View>
             <View className="flex flex-row items-center gap-3">
@@ -78,7 +82,7 @@ export default function BlogDetail() {
               >
                 <AntDesign
                   name="like2"
-                  size={30}
+                  size={25}
                   color={blog.liked === true ? "blue" : "gray"}
                 />
                 <Text className="text-lg">{blog.likes}</Text>
@@ -91,16 +95,17 @@ export default function BlogDetail() {
               >
                 <AntDesign
                   name="dislike2"
-                  size={30}
+                  size={25}
                   color={blog.disliked === true ? "red" : "gray"}
                 />
                 <Text className="text-lg">{blog.dislikes}</Text>
               </TouchableOpacity>
             </View>
           </View>
-          <Text className="py-5">Title: {blog.title}</Text>
-
-          <HTML source={{ html: blog.content }} />
+          <Text className="pt-5 text-[20px] font-bold">{blog.title}</Text>
+          <View className="mb-5">
+            <HTML source={{ html: blog.content }} />
+          </View>
         </ScrollView>
       ) : (
         <Text>Loading...</Text>

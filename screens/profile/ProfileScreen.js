@@ -15,23 +15,28 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useSelector } from "react-redux";
 import * as SecureStore from "expo-secure-store";
 import { loadUser } from "../../redux/actions/userActions";
+import useLogout from "../../hooks/useLogout";
 
 export default function ProfileScreen() {
   const dispatch = useDispatch();
   const { user, userProfile, loading, error, isAuthenticated } = useSelector(
     (state) => state.user
   );
+  const logout = useLogout();
 
-  useFocusEffect(
-    React.useCallback(() => {
-      dispatch(loadUser());
-    }, [dispatch])
-  );
+  // useFocusEffect(
+  //   React.useCallback(() => {
+  //     dispatch(loadUser());
+  //   }, [dispatch])
+  // );
 
   const navigation = useNavigation();
   const signOut = () => {
     SecureStore.deleteItemAsync("secure_token")
-      .then(navigation.navigate("SignInScreen"))
+      .then(() => {
+        logout.onLogout();
+        navigation.navigate("SignInScreen");
+      })
       .catch((error) => {
         console.log("Check error", error);
       });
@@ -44,27 +49,29 @@ export default function ProfileScreen() {
       <View className="bg-blue-500 w-full h-[100px] justify-between flex flex-row items-center px-5">
         <View className="flex flex-row items-center gap-8">
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back-outline" size={20} color="white" />
+            <Ionicons name="arrow-back-outline" size={25} color="white" />
           </TouchableOpacity>
-          <Text className="text-[20px] text-white">Profile</Text>
+          <Text className="text-2xl text-white">Profile</Text>
         </View>
-        <TouchableOpacity onPress={() => navigation.navigate("HelpCenter")}>
-          <AntDesign name="infocirlceo" size={20} color="white" />
-        </TouchableOpacity>
       </View>
       <ScrollView>
         <View className="flex flex-col h-[200px] w-full absolute bg-blue-500 items-center">
-          {userProfile?.avatar ? (
+          {userProfile?.avatar !== null ? (
             <Image
               className="w-[80px] h-[80px] rounded-full"
               source={{ uri: userProfile?.avatar }}
             />
           ) : (
-            <Image className="w-[80px] h-[80px] rounded-full" />
+            <Image
+              className="w-[80px] h-[80px] rounded-full"
+              source={require("../../assets/images/avatar.png")}
+            />
           )}
 
           <Text className="text-[30px] font-bold text-white py-2">
-            {userProfile?.fullName}
+            {userProfile?.fullName
+              ? userProfile?.fullName
+              : userProfile?.username}
           </Text>
           {/* <Text className="text-yellow-400">{userProfile?.role.name}</Text> */}
         </View>
@@ -234,9 +241,9 @@ export default function ProfileScreen() {
               <Octicons name="chevron-right" size={24} color="black" />
             </TouchableOpacity>
           </View> */}
-          <Text className="text-3xl font-bold mb-3 mt-6">Partner</Text>
+          {/* <Text className="text-3xl font-bold mb-3 mt-6">Partner</Text> */}
           <View className=" flex flex-col gap-1">
-            <TouchableOpacity
+            {/* <TouchableOpacity
               activeOpacity={0.7}
               onPress={() => navigation.navigate("Landing")}
               className="flex flex-row items-center justify-between py-4 pl-2"
@@ -246,7 +253,7 @@ export default function ProfileScreen() {
                 <Text className="text-lg">Add apartment</Text>
               </View>
               <Octicons name="chevron-right" size={24} color="black" />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             <TouchableOpacity
               onPress={signOut}
               className="flex flex-row items-center gap-3"

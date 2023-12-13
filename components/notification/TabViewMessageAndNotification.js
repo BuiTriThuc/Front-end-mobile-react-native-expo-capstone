@@ -32,8 +32,8 @@ const getAvatarSource = (item, currentUser) => {
 };
 
 export default function TabViewMessageAndNotification() {
-    const tabs = ["Chat", "Notifications"];
-    const [selectedTab, setSelectedTab] = useState("Chat");
+    const tabs = ["Chats", "Notifications"];
+    const [selectedTab, setSelectedTab] = useState("Chats");
     const navigation = useNavigation();
     const [loading, setLoading] = useState(false);
     const notifications = useSelector((state) => state.pushNotification.data);
@@ -42,7 +42,7 @@ export default function TabViewMessageAndNotification() {
     const [currentUser, setCurrentUser] = useState();
     const [searchText, setSearchText] = useState('');
     const dispatch = useDispatch();
-    const [conversationList, setConversationList] = useState([]);
+    const [conversationList, setConversationList] = useState();
 
     const fetchConversationData = useCallback(() => {
         ConversationApis.getCurrentUserConversation().then((res) => {
@@ -138,7 +138,7 @@ export default function TabViewMessageAndNotification() {
 
     const renderTabContent = () => {
         switch (selectedTab) {
-            case "Chat":
+            case "Chats":
                 return (
                     <View>
                         <SearchBar onChangeText={setSearchText} searchText={searchText}/>
@@ -146,12 +146,12 @@ export default function TabViewMessageAndNotification() {
                             showsVerticalScrollIndicator={false}
                             className="w-[95%] py-3"
                         >
-                            {conversationList && conversationLoaded ?
+                            {(conversationList && conversationLoaded) ?
                                 (conversationList?.length !== 0 ? (
                                     conversationList?.map((item, index) => (
                                         <TouchableOpacity
                                             key={item?.conversationId}
-                                            className="flex flex-row items-center w-full py-4 gap-2 px-3"
+                                            className="flex bg-red flex-row items-center w-full py-4 gap-2 px-3"
                                             onPress={() =>
                                                 navigation.navigate("ChatItemScreen", {
                                                     avatar: getAvatarSource(item, currentUser),
@@ -168,12 +168,11 @@ export default function TabViewMessageAndNotification() {
                                                 })
                                             }
                                         >
-
                                             <Image
-                                                className="mr-[8px] rounded-full w-[60] h-[60] mb-[20px]"
+                                                className="mr-[4px] rounded-full w-[60] h-[60]"
                                                 source={{uri: getAvatarSource(item, currentUser)}}
                                             />
-                                            <View className="w-full pr-3 flex flex-col">
+                                            <View className="w-full pr-2 flex flex-col">
                                                 <Text
                                                     className="text-[15px] font-bold text-ellipsis overflow-hidden text-gray-900 dark:text-white">
                                                     {item.participants?.length > 2
@@ -226,6 +225,7 @@ export default function TabViewMessageAndNotification() {
                 return (
                     <View style={styles.shadow} className="flex-1 ">
                         <View style={styles.container}>
+                            {notifications && (notifications?.length !== 0 ?
                             <FlatList
                                 data={notifications}
                                 extraData={notifications.length}
@@ -246,7 +246,11 @@ export default function TabViewMessageAndNotification() {
                                         <NotificationWidget {...item} onPress={handleRead}/>
                                     </Swipable>
                                 )}
-                            />
+                            />: (<View className="px-4">
+                                    <Text className="text-[18px] py-2 font-bold text-center mt-4">
+                                        No notification.
+                                    </Text>
+                                </View>))}
                         </View>
                     </View>
                 );
@@ -259,7 +263,6 @@ export default function TabViewMessageAndNotification() {
     return (
         <View className="flex-1 px-4 bg-white">
             <View>
-
                 <View className="flex flex-row gap-6">
                     {tabs?.map((tab) => (
                         <TouchableOpacity

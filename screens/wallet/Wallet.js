@@ -45,7 +45,7 @@ export default function Wallet() {
 
       <ScrollView>
         <View className="flex flex-col h-[200px] w-full  bg-blue-500 items-center">
-          {userProfile?.avatar ? (
+          {userProfile?.avatar !== null ? (
             <Image
               className="w-[80px] h-[80px] rounded-full"
               source={{ uri: userProfile?.avatar }}
@@ -53,11 +53,13 @@ export default function Wallet() {
           ) : (
             <Image
               className="w-[80px] h-[80px] rounded-full"
-              source={require("../../assets/images/avt.jpg")}
+              source={require("../../assets/images/avatar.png")}
             />
           )}
           <Text className="text-[30px] font-bold text-white py-2">
-            {userProfile?.fullName}
+            {userProfile?.fullName
+              ? userProfile?.fullName
+              : userProfile?.username}
           </Text>
           <Text className="text-yellow-400"> {userProfile?.role?.name}</Text>
         </View>
@@ -68,7 +70,7 @@ export default function Wallet() {
               <Text className="text-[30px] font-bold">Point</Text>
               <View className="flex flex-row items-center">
                 <Text className="text-[20px] font-bold mr-2">
-                  {Number(totalPoint).toFixed(2)}
+                  {Number(totalPoint)?.toFixed(2)}
                 </Text>
                 <FontAwesome5 name="coins" size={20} color="orange" />
               </View>
@@ -131,11 +133,11 @@ export default function Wallet() {
                           <View className="flex flex-row gap-2 items-center">
                             <View>
                               <Image
-                                className="w-[30px] h-[30px] rounded-full"
+                                className="w-[50px] h-[50px] rounded-full"
                                 source={{ uri: userProfile?.avatar }}
                               />
                             </View>
-                            <View>
+                            <View className="w-[70%]">
                               <Text className="font-bold">
                                 {transaction.message}
                               </Text>
@@ -146,11 +148,13 @@ export default function Wallet() {
                                 <Text className="text-[12px]">
                                   Wallet balance:
                                 </Text>
-                                <Text>{transaction.totalPoint}</Text>
+                                <Text>
+                                  {transaction?.totalPoint?.toFixed(2)}
+                                </Text>
                               </View>
                             </View>
                           </View>
-                          <View className="flex flex-row items-center">
+                          <View className="flex flex-row items-center absolute right-0">
                             <View>
                               <Text className="mt-8 font-bold">
                                 {transaction.amount}

@@ -12,7 +12,7 @@ const NotificationWidget = ({notificationId, isRead, content, subject, createdOn
                 size={32}
                 color={`${isRead ? 'gray' : '#ff3030'}`}
             />
-            <View className="w-full pl-3 pr-3 flex flex-col gap-2">
+            <View className="w-full pl-3 pr-3 flex flex-col gap-1">
                 <Text
                     className="text-[15px] font-bold text-ellipsis overflow-hidden text-gray-900 dark:text-white"
                 >

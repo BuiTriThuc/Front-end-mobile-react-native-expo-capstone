@@ -44,23 +44,20 @@ export default function SignInScreen() {
         text2: error,
       });
     }
-
-    console.log("Check user in sign in screen", user);
   }, [isAuthenticated, navigation, error, user]);
 
-  console.log("chekc error in screen", error);
   return (
     <ScrollView>
       <View className="flex justify-center items-center">
         <View className="flex-row items-center justify-center pt-10">
-          <View className="-ml-[130px] mr-[70px]">
+          {/* <View className="-ml-[130px] mr-[70px]">
             <TouchableOpacity
               className="w-[55px] h-[55px] bg-[#D9D5D5] rounded-full flex justify-center items-center "
               onPress={() => navigation.goBack()}
             >
               <AntDesign name="arrowleft" size={20} color="#AAAAAA" />
             </TouchableOpacity>
-          </View>
+          </View> */}
           <View>
             <Text className="font-bold text-[24px]">Sign In</Text>
           </View>
@@ -94,6 +91,7 @@ export default function SignInScreen() {
         >
           <Text className="text-white text-lg font-bold">Sign In</Text>
         </TouchableOpacity>
+        <BtnLoginGoogle />
       </View>
     </ScrollView>
   );

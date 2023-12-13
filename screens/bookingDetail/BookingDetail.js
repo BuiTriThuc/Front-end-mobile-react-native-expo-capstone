@@ -29,7 +29,9 @@ import {
   createRatingBooking,
   getRatingBooking,
 } from "../../redux/actions/ratingActions";
-import { loadUser } from "../../redux/actions/userActions";
+import Toast from "react-native-toast-message";
+import { CREATE_RATING_BOOKING_RESET } from "../../redux/constants/ratingConstant";
+import StarRating from "react-native-star-rating-widget";
 
 export default function BookingDetail() {
   const route = useRoute();
@@ -42,16 +44,11 @@ export default function BookingDetail() {
   const { userProfile } = useSelector((state) => state.user);
   const { success, error } = useSelector((state) => state.createRatingBooking);
   const navigation = useNavigation();
+
   useEffect(() => {
     dispatch(getBookingDetails(id));
     dispatch(getRatingBooking(id));
   }, [dispatch, id]);
-
-  useFocusEffect(
-    React.useCallback(() => {
-      dispatch(loadUser());
-    }, [dispatch])
-  );
 
   const toggleBottomNavigationGuest = () => {
     setVisibleGuest(!visibleGuest);
@@ -84,6 +81,21 @@ export default function BookingDetail() {
     dispatch(createRatingBooking(userProfile.userId, id, data));
     setVisibleRating(false);
   };
+
+  useEffect(() => {
+    if (success) {
+      dispatch(getRatingBooking(id));
+    }
+
+    if (error) {
+      Toast.show({
+        type: "error",
+        text1: "Review",
+        text2: error,
+      });
+      dispatch({ type: CREATE_RATING_BOOKING_RESET });
+    }
+  }, [success, id, dispatch]);
   return (
     <Fragment>
       {loading ? (
@@ -327,7 +339,11 @@ export default function BookingDetail() {
                   <View className="pt-5 px-4">
                     <View className="flex flex-row gap-3 items-center">
                       <Image
-                        source={{ uri: ratings?.user?.avatar }}
+                        source={
+                          ratings?.user?.avatar
+                            ? { uri: ratings?.user?.avatar }
+                            : require("../../assets/images/avatar.png")
+                        }
                         className="rounded-full h-20 w-20"
                       />
                       <View>
@@ -346,6 +362,9 @@ export default function BookingDetail() {
                         ) : (
                           ""
                         )}
+                        <View pointerEvents="none">
+                          <StarRating starSize={18} rating={ratings.rating} />
+                        </View>
                       </View>
                     </View>
 
